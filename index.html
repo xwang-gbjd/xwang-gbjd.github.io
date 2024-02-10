@@ -124,24 +124,26 @@
             document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
 
             // 弹出数字后，添加输入框和处理按钮
-            var directionInputHtml = '<h2>请输入“南方”或者“北方”：</h2>' +
-                '<input type="text" id="direction">' +
+            var directionInputHtml = '<h2>请选择“南方”或者“北方”：</h2>' +
+                '<input type="radio" id="north" name="direction" value="北方"><label for="north">北方</label>' +
+                '<input type="radio" id="south" name="direction" value="南方"><label for="south">南方</label>' +
                 '<button id="adjustList">根据你是哪里人调整牌序</button>';
             document.getElementById("directionInputSection").innerHTML = directionInputHtml;
             document.getElementById("adjustList").onclick = function() { adjustListByDirection(); this.disabled = true; };
         }
 
         function adjustListByDirection() {
-            var direction = document.getElementById("direction").value;
+            var isNorthChecked = document.getElementById("north").checked;
+            var isSouthChecked = document.getElementById("south").checked;
             var listText = document.getElementById("numbersList").innerHTML;
             var numbersString = listText.replace("当前牌序: ", "");
             var numbers = numbersString.split(', ').map(Number);
 
             var middleIndex = Math.floor(numbers.length / 2); // 计算中间位置
-            if (direction === "北方") {
+            if (isNorthChecked) {
                 var firstNumber = numbers.splice(0, 1); // 移除第一个数字
                 numbers.splice(middleIndex, 0, ...firstNumber); // 将第一个数字插入到中间
-            } else if (direction === "南方") {
+            } else if (isSouthChecked) {
                 var firstTwoNumbers = numbers.splice(0, 2); // 移除前两个数字
                 numbers.splice(middleIndex, 0, ...firstTwoNumbers); // 将前两个数字插入到中间
             } else {
@@ -152,15 +154,17 @@
             document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
 
             // 在调整列表后，添加性别输入框和处理按钮
-            var genderInputHtml = '<h2>请输入“男”或者“女”：</h2>' +
-                '<input type="text" id="gender">' +
+            var genderInputHtml = '<h2>请选择性别：</h2>' +
+                '<label><input type="radio" name="gender" value="男">男</label>' +
+                '<label><input type="radio" name="gender" value="女">女</label>' +
                 '<button id="adjustListByGender">根据你的性别调整牌序</button>';
             document.getElementById("genderInputSection").innerHTML = genderInputHtml;
             document.getElementById("adjustListByGender").onclick = function() { adjustListByGender(); this.disabled = true; };
         }
 
         function adjustListByGender() {
-            var gender = document.getElementById("gender").value;
+            var genderElements = document.getElementsByName("gender");
+            var gender = Array.from(genderElements).find(element => element.checked)?.value;
             var listText = document.getElementById("numbersList").innerHTML;
             var numbersString = listText.replace("当前牌序: ", "");
             var numbers = numbersString.split(', ').map(Number);
@@ -224,8 +228,8 @@
             }
 
             setTimeout(function() {
-                alert("最后剩的牌为: " + numbers[0] + "，而你最开始拿掉的数字为: " + savedElement + "! 好运留下来！新年快乐！");
-            }, 1000);
+                alert("最后剩的牌为: " + numbers[0] + "，而你最开始拿掉的牌为: " + savedElement + "! 好运留下来！新年快乐！");
+            }, 2000);
 
         }
 
