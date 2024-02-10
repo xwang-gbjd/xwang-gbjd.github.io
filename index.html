@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字处理页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        input[type=number], input[type=text] {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        #numbersList {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+    <script>
+        // 定义一个全局变量来存储弹出的元素
+        var savedElement;
+
+        window.onload = function() {
+            document.getElementById("duplicateNumbers").onclick = function() { duplicateAndDisplayNumbers(); this.disabled = true; };
+        }
+
+        function duplicateAndDisplayNumbers() {
+            var numbers = [];
+            for (var i = 1; i <= 4; i++) {
+                var num = document.getElementById("number" + i).value;
+                if (num !== '') {
+                    numbers.push(parseInt(num, 10));
+                }
+            }
+            var duplicatedNumbers = numbers.concat(numbers);
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + duplicatedNumbers.join(', ');
+
+            // 添加输入名字的输入框和按钮
+            var nameInputHtml = '<h2>输入您的名字</h2>' +
+                '<input type="text" id="name">' +
+                '<button id="shiftNumbers">根据名字调整牌序</button>';
+            document.getElementById("nameInputSection").innerHTML = nameInputHtml;
+            document.getElementById("shiftNumbers").onclick = function() { shiftNumbersByName(); this.disabled = true; };
+        }
+
+        function shiftNumbersByName() {
+            var name = document.getElementById("name").value;
+            adjustNumbersList(name.length);
+
+            // 添加移动前3个数字到末尾的按钮
+            var moveThreeHtml = '<button id="moveThree">移动前3张牌到中间</button>';
+            document.getElementById("moveThreeSection").innerHTML = moveThreeHtml;
+            document.getElementById("moveThree").onclick = function() { moveFirstThreeToMiddle(); this.disabled = true; };
+        }
+
+        function adjustNumbersList(shiftCount) {
+            var listText = document.getElementById("numbersList").innerHTML;
+            var numbersString = listText.replace("当前牌序: ", "");
+            var numbers = numbersString.split(', ').map(Number);
+
+            for (var i = 0; i < shiftCount; i++) {
+                numbers.push(numbers.shift());
+            }
+
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
+        }
+
+        function moveFirstThreeToMiddle() {
+            var listText = document.getElementById("numbersList").innerHTML;
+            var numbersString = listText.replace("当前牌序: ", "");
+            var numbers = numbersString.split(', ').map(Number);
+
+            if (numbers.length >= 3) {
+                var firstThree = numbers.splice(0, 3); // 移除前3个数字
+                var middleIndex = Math.floor(numbers.length / 2); // 计算剩余数组中间的位置
+                numbers.splice(middleIndex, 0, ...firstThree); // 在中间位置插入这3个数字
+            }
+
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
+
+            // 添加一个新按钮，用于pop数组的第一个元素并显示
+            var popFirstHtml = '<button id="popFirst">拿掉第一张牌</button>';
+            document.getElementById("popFirstSection").innerHTML = popFirstHtml;
+            document.getElementById("popFirst").onclick = function() { popAndShowFirstElement(); this.disabled = true; };
+        }
+
+        function popAndShowFirstElement() {
+            var listText = document.getElementById("numbersList").innerHTML;
+            var numbersString = listText.replace("当前牌序: ", "");
+            var numbers = numbersString.split(', ').map(Number);
+
+            if (numbers.length > 0) {
+                savedElement = numbers.shift(); // 移除并获取数组的第一个元素
+                alert("你拿掉的牌为: " + savedElement + "，记住这张牌！"); // 弹窗显示这个数字
+            }
+
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
+
+            // 弹出数字后，添加输入框和处理按钮
+            var directionInputHtml = '<h2>请输入“南方”或者“北方”：</h2>' +
+                '<input type="text" id="direction">' +
+                '<button id="adjustList">根据你是哪里人调整牌序</button>';
+            document.getElementById("directionInputSection").innerHTML = directionInputHtml;
+            document.getElementById("adjustList").onclick = function() { adjustListByDirection(); this.disabled = true; };
+        }
+
+        function adjustListByDirection() {
+            var direction = document.getElementById("direction").value;
+            var listText = document.getElementById("numbersList").innerHTML;
+            var numbersString = listText.replace("当前牌序: ", "");
+            var numbers = numbersString.split(', ').map(Number);
+
+            var middleIndex = Math.floor(numbers.length / 2); // 计算中间位置
+            if (direction === "北方") {
+                var firstNumber = numbers.splice(0, 1); // 移除第一个数字
+                numbers.splice(middleIndex, 0, ...firstNumber); // 将第一个数字插入到中间
+            } else if (direction === "南方") {
+                var firstTwoNumbers = numbers.splice(0, 2); // 移除前两个数字
+                numbers.splice(middleIndex, 0, ...firstTwoNumbers); // 将前两个数字插入到中间
+            } else {
+                var firstThreeNumbers = numbers.splice(0, 3); // 移除前三个数字
+                numbers.splice(middleIndex, 0, ...firstThreeNumbers); // 将前三个数字插入到中间
+            }
+
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
+
+            // 在调整列表后，添加性别输入框和处理按钮
+            var genderInputHtml = '<h2>请输入“男”或者“女”：</h2>' +
+                '<input type="text" id="gender">' +
+                '<button id="adjustListByGender">根据你的性别调整牌序</button>';
+            document.getElementById("genderInputSection").innerHTML = genderInputHtml;
+            document.getElementById("adjustListByGender").onclick = function() { adjustListByGender(); this.disabled = true; };
+        }
+
+        function adjustListByGender() {
+            var gender = document.getElementById("gender").value;
+            var listText = document.getElementById("numbersList").innerHTML;
+            var numbersString = listText.replace("当前牌序: ", "");
+            var numbers = numbersString.split(', ').map(Number);
+
+            if (gender === "男") {
+                numbers.splice(0, 1); // 去掉列表第一个数字
+            } else {
+                numbers.splice(0, 2); // 去掉列表前两个数字
+            }
+
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
+
+            // 在调整列表后，添加“挪动数字”按钮
+            var moveNumberHtml = '<button id="moveNumberSevenTimes">见证奇迹的时刻</button>';
+            document.getElementById("moveNumberSection").innerHTML = moveNumberHtml;
+            document.getElementById("moveNumberSevenTimes").onclick = function() { moveNumberSevenTimes(); this.disabled = true; };
+        }
+
+        function moveNumberSevenTimes() {
+            var listText = document.getElementById("numbersList").innerHTML;
+            var numbersString = listText.replace("当前牌序: ", "");
+            var numbers = numbersString.split(', ').map(Number);
+            var words = "见证奇迹的时刻";
+
+            // 清除原有显示内容
+            document.getElementById("numbersList").innerHTML = "当前牌序: " + numbers.join(', ');
+
+            for (let i = 0; i < 7; i++) {
+                numbers.push(numbers.shift()); // 将第一个数字挪到最后
+                document.getElementById("numbersList").innerHTML += "<br>" + words[i] + "：" + numbers.join(', ');
+            }
+
+            // 在完成“见证奇迹的时刻”操作后，添加“开始最终操作”按钮
+            var finalOperationHtml = '<button id="startFinalOperation">好运留下来，烦恼丢出去</button>';
+            document.getElementById("finalOperationSection").innerHTML = finalOperationHtml;
+            document.getElementById("startFinalOperation").onclick = function() { startFinalOperation(); this.disabled = true; };
+        }
+
+        function startFinalOperation() {
+            var listText = document.getElementById("numbersList").innerHTML;
+            // 使用split将内容按换行符分割成数组，并取最后一个非空行作为初始数组
+            var allLines = listText.split("<br>").filter(line => line.trim() !== "");
+            var lastLine = allLines[allLines.length - 1];
+            var numbersString = lastLine.replace(/[^0-9,]/g, ''); // 移除非数字和非逗号的字符
+            var numbers = numbersString.split(',').map(Number);
+
+            document.getElementById("numbersList").innerHTML += "<br>最后的牌序: " + numbers.join(', ') + "<br>";
+
+            // 修正逻辑以满足需求
+            while (numbers.length > 1) {
+                // 弹出第一个元素
+                var firstElement = numbers.shift();
+                // 将这个元素添加到最后
+                numbers.push(firstElement);
+                // 打印数组
+                document.getElementById("numbersList").innerHTML += "好运留下来: " + numbers.join(',') + "<br>";
+                // 弹出第一个元素
+                numbers.shift();
+                // 打印数组
+                document.getElementById("numbersList").innerHTML += "烦恼丢出去: " + numbers.join(',') + "<br>";
+            }
+
+            setTimeout(function() {
+                alert("最后剩的牌为: " + numbers[0] + "，而你最开始拿掉的数字为: " + savedElement + "! 好运留下来！新年快乐！");
+            }, 1000);
+
+        }
+
+    </script>
+</head>
+<body>
+<h2>请输入4个数字作为4张牌</h2>
+<input type="number" id="number1">
+<input type="number" id="number2">
+<input type="number" id="number3">
+<input type="number" id="number4">
+<button id="duplicateNumbers">将牌撕开并摆好</button>
+<br><br>
+<div id="nameInputSection"></div>
+<div id="moveThreeSection"></div>
+<div id="popFirstSection"></div>
+<div id="directionInputSection"></div> <!-- 用于动态添加方向输入框和按钮的区域 -->
+<div id="genderInputSection"></div> <!-- 用于动态添加性别输入框和按钮的区域 -->
+<div id="moveNumberSection"></div> <!-- 用于动态添加“挪动数字”按钮的区域 -->
+<div id="finalOperationSection"></div> <!-- 用于动态添加“处理数字”按钮的区域 -->
+<div id="numbersList">当前牌序: </div>
+</body>
+</html>
